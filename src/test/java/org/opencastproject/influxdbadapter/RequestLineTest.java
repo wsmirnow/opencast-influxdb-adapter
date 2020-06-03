@@ -54,4 +54,20 @@ class RequestLineTest {
     Assertions.assertThat(requestLine.get().getEpisodeId()).isEqualTo("5a990722-6f18-4c69-ac84-4721934cb58b");
     Assertions.assertThat(requestLine.get().getAssetId()).isEqualTo("c5f2ac27-0da1-4d91-952c-771905058ef5");
   }
+
+  @ParameterizedTest
+  @ValueSource(strings = {
+          "GET /oaipmh-default/5a990722-6f18-4c69-ac84-4721934cb58b/c5f2ac27-0da1-4d91-952c-771905058ef5/myvideo.mp4 HTTP/1.1",
+          "GET /oaipmh-library/5a990722-6f18-4c69-ac84-4721934cb58b/c5f2ac27-0da1-4d91-952c-771905058ef5/myvideo.mp4 HTTP/1.1",
+          "GET /oaipmh-portal/5a990722-6f18-4c69-ac84-4721934cb58b/c5f2ac27-0da1-4d91-952c-771905058ef5/myvideo.mp4 HTTP/1.1",
+  })
+  void testRequestLinePatternWithDifferentPublicationChannelsAndWithoutOrgId(String line) {
+    Optional<RequestLine> requestLine = RequestLine.parseLine(line);
+    Assertions.assertThat(requestLine.isPresent()).isEqualTo(true);
+    Assertions.assertThat(requestLine.get().getMethod()).isEqualTo("GET");
+    Assertions.assertThat(requestLine.get().getOrganizationId()).isEqualTo("mh_default_org");
+    Assertions.assertThat(requestLine.get().getPublicationChannel()).isIn("oaipmh-default", "oaipmh-library", "oaipmh-portal");
+    Assertions.assertThat(requestLine.get().getEpisodeId()).isEqualTo("5a990722-6f18-4c69-ac84-4721934cb58b");
+    Assertions.assertThat(requestLine.get().getAssetId()).isEqualTo("c5f2ac27-0da1-4d91-952c-771905058ef5");
+  }
 }

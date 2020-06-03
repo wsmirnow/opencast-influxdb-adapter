@@ -33,6 +33,9 @@ import java.util.regex.Pattern;
 public final class RequestLine {
   private static final Pattern REQUEST_PARSER = Pattern.compile(
           "^(?<method>[^ ]+) /(?<organizationid>[^/]+)/(?<publicationchannel>[^/]+)/(?<episodeid>[^/]+)/(?<assetid>[^/]+)/[^/ ]+ .+$");
+  private static final Pattern REQUEST_PARSER_MH_STRUCTURE = Pattern.compile(
+          "^(?<method>[^ ]+) /(?<publicationchannel>[^/]+)/(?<episodeid>[^/]+)/(?<assetid>[^/]+)/[^/ ]+ .+$");
+  private static final String DEFAULT_ORG_ID = "mh_default_org";
 
   private final String method;
   private final String organizationId;
@@ -64,10 +67,28 @@ public final class RequestLine {
   public static Optional<RequestLine> parseLine(final CharSequence line) {
     final Matcher m = REQUEST_PARSER.matcher(line);
     if (!m.matches())
-      return Optional.empty();
+      return parseLineMatterhornDirectroyStructure(line);
     return Optional.of(new RequestLine(
             m.group("method"),
             m.group("organizationid"),
+            m.group("publicationchannel"),
+            m.group("episodeid"),
+            m.group("assetid")));
+  }
+
+  /**
+   * Create a request line from a given line and a default organization
+   *
+   * @param line A given request line
+   * @return <code>of(line)</code> if the line was parsed successfully, else <code>empty()</code>
+   */
+  static Optional<RequestLine> parseLineMatterhornDirectroyStructure(final CharSequence line) {
+    final Matcher m = REQUEST_PARSER_MH_STRUCTURE.matcher(line);
+    if (!m.matches())
+      return Optional.empty();
+    return Optional.of(new RequestLine(
+            m.group("method"),
+            DEFAULT_ORG_ID,
             m.group("publicationchannel"),
             m.group("episodeid"),
             m.group("assetid")));
